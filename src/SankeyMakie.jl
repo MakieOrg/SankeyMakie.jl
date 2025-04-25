@@ -4,9 +4,10 @@ using LayeredLayouts
 using Graphs, MetaGraphs
 using SparseArrays
 using Makie
+using Compat
 
 export sankey, sankey!
-public SourceColor, TargetColor
+@compat public SourceColor, TargetColor
 
 """
     sankey(connections; kwargs...)
