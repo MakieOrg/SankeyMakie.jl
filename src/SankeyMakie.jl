@@ -6,6 +6,7 @@ using SparseArrays
 using Makie
 
 export sankey, sankey!
+public SourceColor, TargetColor
 
 """
     sankey(connections; kwargs...)
@@ -25,7 +26,7 @@ Specific attributes to `sankey` are:
 ```julia
 using CairoMakie, SankeyMakie
 connections = [(1, 2, 10), (1, 3, 15), (3, 4, 5)]
-sankey(connections; nodelabels=["A", "B", "C", "D"])
+sankey(connections; nodelabels = ["A", "B", "C", "D"])
 ```
 """
 @recipe(Sankey) do scene
@@ -175,15 +176,56 @@ function sankey_graph(v::Vector{<:Tuple{Int,Int,Real}})
 end
 
 get_node_color(s::Symbol, i) = s
+get_node_color(s::Makie.Colors.Colorant, i) = s
 get_node_color(v::AbstractVector{<:Makie.Colors.Colorant}, i) = v[i]
 
 get_link_color(v::AbstractVector{<:Makie.Colors.Colorant}, i, j, k) = v[k]
 get_link_color(x, i, j, k) = x
 get_link_color(x, i, j, k, nodecolor) = get_link_color(x, i, j, k)
 
+"""
+    SourceColor(alpha::Float64)
+Sets link colors depending on the color of their source node and an alpha level.
+
+## Example
+
+```julia
+using CairoMakie, SankeyMakie
+connections = [(1, 2, 10), (1, 3, 15), (3, 4, 5)]
+labels = ["A", "B", "C", "D"]
+colors = Makie.to_colormap(:tab20)
+sankey(
+    connections; 
+    nodelabels = labels,
+    nodecolor = colors[1:length(labels)],
+    linkcolor = SankeyMakie.SourceColor(0.2),
+)
+```
+"""
 struct SourceColor
     alpha::Float64
 end
+
+"""
+    TargetColor(alpha::Float64)
+
+Sets link colors depending on the color of their target node and an alpha level.
+
+## Example
+
+```julia
+using CairoMakie, SankeyMakie
+connections = [(1, 2, 10), (1, 3, 15), (3, 4, 5)]
+labels = ["A", "B", "C", "D"]
+colors = Makie.to_colormap(:tab20)
+sankey(
+    connections; 
+    nodelabels = labels,
+    nodecolor = colors[1:length(labels)],
+    linkcolor = SankeyMakie.TargetColor(0.2),
+)
+```
+"""
 struct TargetColor
     alpha::Float64
 end

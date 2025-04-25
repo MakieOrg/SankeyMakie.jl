@@ -8,7 +8,7 @@ CurrentModule = SankeyMakie
 
 The flows are called links and the states they connect are called nodes.
 
-The main entry point to the package is the [`sankey`](@ref) recipe, which takes a vector of `(source, target, weight)` tuples as input!
+The main entry point to the package is the [`sankey`](@ref) recipe, which takes a vector of `(source, target, weight)` tuples as input.
 
 ## Quick start
 
@@ -39,9 +39,9 @@ labels = [
 
 fig, ax, plt = sankey(
   connections; 
-  nodelabels=labels,
-  nodecolor=Makie.to_colormap(:tab20)[1:length(labels)], 
-  linkcolor=SankeyMakie.TargetColor(0.2)
+  nodelabels = labels,
+  nodecolor = Makie.to_colormap(:tab20)[1:length(labels)], 
+  linkcolor = SankeyMakie.TargetColor(0.2)
 )
 
 hidedecorations!(ax)
