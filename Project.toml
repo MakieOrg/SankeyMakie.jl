@@ -4,6 +4,7 @@ authors = ["Julius Krumbiegel"]
 version = "0.1.0"
 
 [deps]
+Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 LayeredLayouts = "f4a74d36-062a-4d48-97cd-1356bad1de4e"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
@@ -11,6 +12,7 @@ MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
+Compat = "4.16.0"
 Graphs = "1.5"
 LayeredLayouts = "0.2.4"
 Makie = "0.21, 0.22"
@@ -18,12 +20,12 @@ MetaGraphs = "0.7, 0.8"
 julia = "1.10"
 
 [extras]
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Random", "Statistics", "Test", "CairoMakie", "DelimitedFiles", "ImageInTerminal"]

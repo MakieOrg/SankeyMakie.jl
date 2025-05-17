@@ -1,2 +1,8 @@
-/Manifest.toml
+/**/Manifest.toml
 dev/
+.DS_Store
+
+/docs/build/
+/docs/package-lock.json
+/docs/src/source
+/**/node_modules/
