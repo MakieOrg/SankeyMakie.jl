@@ -11,11 +11,12 @@ A Makie port of [https://github.com/daschw/SankeyPlots.jl](https://github.com/da
 
 ## Example
 
+![sankey example](sankey.svg)
+
 ```julia
 using SankeyMakie
 using CairoMakie
 using Random
-Random.seed!(123)
 
 connections = [
     (1, 2, 1100),
@@ -52,15 +53,11 @@ labels = [
     "Groceries",
 ]
 
-f, ax, s = sankey(connections,
+sankey(connections,
     nodelabels = labels,
-    nodecolor = rand(RGBf, length(labels)),
-    linkcolor = SankeyMakie.TargetColor(0.2),
-    figure = (; resolution = (1000, 500)))
-hidedecorations!(ax)
-hidespines!(ax)
-
-save("sankey.svg", f)
+    nodecolor = Makie.to_colormap(:tab20)[1:length(labels)],
+    linkcolor = SankeyMakie.Gradient(0.7),
+    axis = hidden_axis(),
+    figure = (; size = (1000, 500))
+)
 ```
-
-![sankey example](sankey.svg)
