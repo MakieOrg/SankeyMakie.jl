@@ -23,7 +23,7 @@ makedocs(;
 )
 
 DocumenterVitepress.deploydocs(;
-    repo = "github.com/MakieOrg/SwarmMakie.jl",
+    repo = "github.com/MakieOrg/SankeyMakie.jl",
     devbranch = "main",
     push_preview = true,
 )
