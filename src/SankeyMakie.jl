@@ -6,8 +6,8 @@ using SparseArrays
 using Makie
 using Compat
 
-export sankey, sankey!
-@compat public SourceColor, TargetColor
+export sankey, sankey!, hidden_axis
+@compat public SourceColor, TargetColor, Gradient
 
 """
     sankey(connections; kwargs...)
@@ -111,19 +111,26 @@ function Makie.plot!(s::Sankey)
                     append!(sankey_y, y_coords)
                     sankey_x = range(x[i]+wbox, x[k]-wbox, length = length(sankey_y))
 
-                    pol = linkpoly(s, scene, xvals, yvals .- h_edge, 2h_edge)
-                    
-                    poly!(
-                        s,
-                        pol,
-                        color = get_link_color(
+                    xs_lower_upper = linkband(s, scene, xvals, yvals .- h_edge, 2h_edge)
+
+                    color = lift(xs_lower_upper) do (xs, _, _)
+                        get_link_color(
                             s.linkcolor[],
                             i,
                             k,
                             linkindexdict[(i, k)],
-                            s.nodecolor[]
-                        ),
-                        space = :pixel
+                            s.nodecolor[],
+                            xs,
+                        )
+                    end
+                    
+                    band!(
+                        s,
+                        @lift($xs_lower_upper[1]),
+                        @lift($xs_lower_upper[2]),
+                        @lift($xs_lower_upper[3]);
+                        color,
+                        space = :pixel,
                     )
                 end
             end
@@ -176,13 +183,9 @@ function sankey_graph(v::Vector{<:Tuple{Int,Int,Real}})
     sankey_graph(getindex.(v, 1), getindex.(v, 2), getindex.(v, 3))
 end
 
-get_node_color(s::Symbol, i) = s
-get_node_color(s::Makie.Colors.Colorant, i) = s
-get_node_color(v::AbstractVector{<:Makie.Colors.Colorant}, i) = v[i]
+get_node_color(x, i) = Makie.to_color(x)
+get_node_color(v::AbstractVector, i) = Makie.to_color(v[i])
 
-get_link_color(v::AbstractVector{<:Makie.Colors.Colorant}, i, j, k) = v[k]
-get_link_color(x, i, j, k) = x
-get_link_color(x, i, j, k, nodecolor) = get_link_color(x, i, j, k)
 
 """
     SourceColor(alpha::Float64)
@@ -231,12 +234,29 @@ struct TargetColor
     alpha::Float64
 end
 
-get_link_color(t::TargetColor, i, j, k, nodecolor) = (get_node_color(nodecolor, j), t.alpha)
-get_link_color(t::SourceColor, i, j, k, nodecolor) = (get_node_color(nodecolor, i), t.alpha)
+struct Gradient
+    alpha::Float64
+end
+
+# four args
+get_link_color(x, i, j, k) = Makie.to_color(x)
+get_link_color(v::AbstractVector, i, j, k) = Makie.to_color(v[k])
+
+# six args
+get_link_color(x, i, j, k, nodecolor, xs) = get_link_color(x, i, j, k)
+get_link_color(t::TargetColor, i, j, k, nodecolor, xs) = (get_node_color(nodecolor, j), t.alpha)
+get_link_color(t::SourceColor, i, j, k, nodecolor, xs) = (get_node_color(nodecolor, i), t.alpha)
+function get_link_color(g::Gradient, i, j, k, nodecolor, xs)
+    g1 = (get_node_color(nodecolor, i), g.alpha)
+    g2 = (get_node_color(nodecolor, j), g.alpha)
+    cmap = Makie.to_colormap([g1, g2])
+    interpolate = true
+    Makie.numbers_to_colors(xs, cmap, identity, Vec2(first(xs), last(xs)), Makie.automatic, Makie.automatic, Makie.RGBAf(0, 0, 0, 0), interpolate)
+end
 
 
 sankey_names(g, names) = names
-sankey_names(g, ::Nothing) = string.("Node", eachindex(vertices(g)))
+sankey_names(g, ::Nothing) = string.(eachindex(vertices(g)))
 
 function sankey_layout!(g, forcelayer, forceorder::Vector{Pair{Int,Int}})
     xs, ys, paths = solve_positions(
@@ -413,13 +433,15 @@ function make_compact(x, y, w)
     return y
 end
 
-function linkpoly(plt, scene, xs, ys, lwidth)
+function linkband(plt, scene, xs, ys, lwidth)
     n = 30
 
     lift(scene.camera.projectionview, scene.viewport) do _, _
 
         nparts = length(xs)-1
-        points = fill(Point2f(1, 1), 2 * n * nparts)
+        xvalues = zeros(n * nparts)
+        lower = zeros(n * nparts)
+        upper = zeros(n * nparts)
 
         for (ipart, (x0, x1, y0, y1)) in enumerate(zip(
                 @view(xs[1:end-1]),
@@ -448,7 +470,9 @@ function linkpoly(plt, scene, xs, ys, lwidth)
             x0pix = start[1]
             x1pix = stop[1]
 
-            for (i, x) in enumerate(range(x0pix, x1pix, length = n))
+            xrange = range(x0pix, x1pix, length = n)
+
+            points_lower_upper = map(xrange) do x
 
                 y = height * (1 - cos(pi * (x - x0pix) / width)) / 2 + start[2]
                 deriv = pi * height * sin((pi * (x - x0pix)) / width) / (2 * width)
@@ -459,21 +483,66 @@ function linkpoly(plt, scene, xs, ys, lwidth)
                 ortho = Point2f(-yortho, xortho)
                 _xy = Point2f(x, y)
 
-                if nparts > 1
-                    points[i + (ipart-1) * n] = _xy - ortho * thickness/2
-                    points[end - (ipart-1) * n - i + 1] = _xy + ortho * thickness/2
-                else
-                    points[i + (ipart-1) * n] = _xy - ortho * thickness/2
-                    points[end - (ipart-1) * n - i + 1] = _xy + ortho * thickness/2
-                end
+                _lower = _xy - ortho * thickness/2
+                _upper = _xy + ortho * thickness/2
+                
+                _lower, _upper
+            end
+
+            points_lower = first.(points_lower_upper)
+            points_upper = last.(points_lower_upper)
+
+            xvalues[((ipart - 1) * n + 1) : ipart * n] = xrange
+            for (i, x) in enumerate(xrange)
+                # we need the same x values for lower and upper because `band` in CairoMakie can only show a gradient that way currently
+                lower[(ipart - 1) * n + i] = linear_interpolate(points_lower, x)
+                upper[(ipart - 1) * n + i] = linear_interpolate(points_upper, x)
             end
         end
 
-        Makie.Polygon(points)
+        return xvalues, lower, upper
+    end
+end
+
+function linear_interpolate(points, x)
+    # assume x in points is sorted and all x will be in the vector
+    i = searchsortedfirst(points, Point2f(x, NaN), by = first)
+    p = points[i]
+    if p[1] == x
+        return p[2]
+    else
+        prev = points[i-1]
+        dx = p[1] - prev[1]
+        frac = (x - prev[1]) / dx
+        return prev[2] + (p[2] - prev[2]) * frac
     end
 end
 
 Makie.data_limits(s::Sankey) = reduce(union, [Makie.data_limits(p) for p in s.plots if !(haskey(p, :space) && p.space[] === :pixel)])
 Makie.boundingbox(s::Sankey, space::Symbol = :data) = Makie.apply_transform_and_model(s, Makie.data_limits(s))
+
+"""
+    hidden_axis()
+
+Returns attributes that can be used to hide all `Axis` decorations.
+"""
+function hidden_axis()
+    Dict([
+        :xticksvisible => false,
+        :yticksvisible => false,
+        :xticklabelsvisible => false,
+        :yticklabelsvisible => false,
+        :xgridvisible => false,
+        :ygridvisible => false,
+        :xminorgridvisible => false,
+        :yminorgridvisible => false,
+        :xminorticksvisible => false,
+        :yminorticksvisible => false,
+        :topspinevisible => false,
+        :bottomspinevisible => false,
+        :leftspinevisible => false,
+        :rightspinevisible => false,
+    ])
+end
 
 end

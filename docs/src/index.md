@@ -20,16 +20,6 @@ hero:
     - theme: alt
       text: API Reference
       link: /api
-
-features:
-  - icon: <img width="64" height="64" src="https://rawcdn.githack.com/JuliaLang/julia-logo-graphics/f3a09eb033b653970c5b8412e7755e3c7d78db9e/images/juliadots.iconset/icon_512x512.png" alt="Julia code"/>
-    title: Pure Julia code
-    details: Fast, understandable, extensible functions
-    link: /introduction
-  - icon: <img width="64" height="64" src="https://rawcdn.githack.com/JuliaGeo/juliageo.github.io/4788480c2a5f7ae36df67a4b142e3a963024ac91/img/juliageo.svg" />
-    title: Full integration with Makie
-    details: Use the powerful layouting of Makie.jl!
-    link: https://docs.makie.org/stable/
 ---
 
 
@@ -40,41 +30,23 @@ features:
 
 # What is SankeyMakie.jl?
 
-SankeyMakie makes sankey plots for Makie through the `sankey` recipe.
-
-## Quick start
-
-The entry point to this package is the `sankey` recipe, which accepts input as a vector of `(source, target, weight)` tuples.
+Sankey plots are used to visualize inflows and outflows between connected nodes.
+You specify the connections and their numerical weights and SankeyMakie computes an appropriate layout for you.
 
 ```@example
 using SankeyMakie, CairoMakie
+
 connections = [
-    (1, 2, 1100),
-    (1, 3, 400),
-    (2, 5, 300),
-    (2, 4, 500),
-    (2, 6, 300),
-    (4, 7, 400),
-    (4, 8, 100),
+    (1, 2, 1200), (1, 3, 600), (2, 5, 100), (2, 4, 500),
+    (2, 9,  300), (2, 6, 200), (4, 7, 50), (4, 8, 100),
 ]
 
 labels = [
-    "Salary",
-    "Income",
-    "Tax",
-    "Rent",
-    "Insurance",
-    "Car",
-    "Internet",
-    "Heating",
+    "Salary", "Net Income", "Tax", "Rent", "Insurance",
+    "Car", "Internet", "Heating", "Food",
 ]
 
-fig, ax, plt = sankey(connections; nodelabels=labels)
-
-hidedecorations!(ax)
-hidespines!(ax)
-
-fig
+sankey(connections; nodelabels = labels, axis = hidden_axis())
 ```
 
 ````@raw html

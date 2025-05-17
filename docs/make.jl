@@ -15,10 +15,11 @@ makedocs(;
         devbranch = "main",
     ),
     pages=[
-        "Introduction" => "introduction.md",
-        "Custom node order" => "custom_node_order.md",
-        "API Reference" => "api.md",
+        "Home" => "index.md",
+        "Reference" => "reference.md",
+        "api.md",
     ],
+    pagesonly = true,
 )
 
 DocumenterVitepress.deploydocs(;

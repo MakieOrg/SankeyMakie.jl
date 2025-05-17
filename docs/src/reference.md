@@ -2,12 +2,158 @@
 CurrentModule = SankeyMakie
 ```
 
-# Custom node order
+# Reference
+
+## `sankey`
+
+### Attributes
+
+#### `linkcolor`
+
+You can pass a scalar to color all links the same:
+
+```@example
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+	(1, 4, 70),
+]
+
+sankey(connections, linkcolor = :tomato, axis = hidden_axis())
+```
+
+Or you pass an array of colors, in which case the order must match the connections array:
+
+```@example
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+	(1, 4, 70),
+]
+
+sankey(
+	connections,
+	linkcolor = [:tomato, RGBAf(0.2, 0.2, 0.8, 0.5), Pattern('/')],
+	axis = hidden_axis()
+)
+```
+
+You can also color the links with the color of their source or target nodes, with an alpha multiplier to visually separate nodes from links:
+
+```@example
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+	(1, 4, 70),
+	(5, 4, 30),
+]
+
+f = Figure()
+
+nodecolor = [:tomato, :bisque, :teal, :goldenrod, :violet]
+
+sankey(
+	f[1, 1],
+	connections;
+	axis = (; title = "SourceColor(0.2)", hidden_axis()...),
+	nodecolor,
+	linkcolor = SankeyMakie.SourceColor(0.2),
+)
+
+sankey(
+	f[1, 2],
+	connections;
+	axis = (; title = "TargetColor(0.5)", hidden_axis()...),
+	nodecolor,
+	linkcolor = SankeyMakie.TargetColor(0.5),
+)
+
+f
+```
+
+And finally, you can color them with a gradient from source to target color, using `Gradient`:
+
+```@example
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+	(1, 4, 70),
+	(5, 4, 30),
+]
+
+nodecolor = [:tomato, :bisque, :teal, :goldenrod, :violet]
+
+f, ax, san = sankey(
+	connections;
+	axis = hidden_axis(),
+	nodecolor,
+	linkcolor = SankeyMakie.Gradient(0.5),
+)
+```
+
+
+#### `nodecolor`
+
+This can be either a scalar color for all nodes at once:
+
+```@example nodecolor
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+]
+
+sankey(connections, nodecolor = :tomato, axis = hidden_axis())
+```
+
+Or you can specify an array of colors:
+
+```@example nodecolor
+sankey(connections, nodecolor = [:tomato, RGBf(0.4, 0.6, 0.9), Pattern('/')], axis = hidden_axis())
+```
+
+#### `nodelabels`
+
+By default, nodes are simply labelled sequentially.
+
+```@example nodelabels
+using SankeyMakie, CairoMakie
+
+connections = [
+	(1, 2, 100),
+	(1, 3, 50),
+]
+
+sankey(connections, axis = hidden_axis())
+```
+
+The `nodelabels` attribute takes a vector of labels, which can be anything that Makie's `text` function supports.
+
+```@example nodelabels
+sankey(
+	connections;
+	nodelabels = [
+		"One",
+		rich("Two", color = :red),
+		L"\sum{three}",
+	],
+	axis = hidden_axis()
+)
+```
+
+#### `forceorder`
 
 Sometimes we want the nodes in a sankey plot layer to be ordered in a specific way.
 To achieve this, we may have to override the default layout by specifying `forceorder` keyword.
-
-## Reversing the order
 
 In a panel with several sankey plots, the default layout sometimes picks different node orders between plots.
 Instead of manually specifying how to reorder each node, we can simply specify `forceorder = :reverse` to flip the order of the nodes of the plots we'd like to adjust.
@@ -44,8 +190,8 @@ colors = parse.(Colorant, ["#AE0404", "#D13D15", "#EAAF2E", "#74D8BD"])
 
 f = Figure(size = (720, 400), backgroundcolor = RGBf(0.95, 0.95, 0.95))
 gl = f[1, 1] = GridLayout()
-ax1 = Axis(gl[1, 1])
-ax2 = Axis(gl[1, 2])
+ax1 = Axis(gl[1, 1]; hidden_axis()...)
+ax2 = Axis(gl[1, 2]; hidden_axis()...)
 
 labels1 = ["0", "1-3", "3-10", "10+", "1-3", "3-10", "10+"]
 
@@ -66,8 +212,6 @@ Label(
     fontsize = 16
 )
 	
-hidedecorations!(ax1)
-
 labels2 = repeat(["No", "Yes"], outer=2)
 
 sankey!(
@@ -87,15 +231,13 @@ Label(
     padding = (0, 0, 5, 0),
     fontsize = 16
 )
-
-hidedecorations!(ax2)
 	
 f
 ```
 
 The right sankey plot would have had the `1+` category at the top if we had not specified `forceorder = :reverse`.
 
-## Manual reorder
+##### Manual reorder
 
 We could have achieved the same result by manually specifying nodes that should be preceded by other nodes.
 
