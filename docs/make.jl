@@ -1,12 +1,13 @@
 using SankeyMakie
-using Documenter, DocumenterVitepress, Literate
+using Documenter
+using DocumenterVitepress
 using CairoMakie
 
 DocMeta.setdocmeta!(SankeyMakie, :DocTestSetup, :(using SankeyMakie); recursive=true)
 
 makedocs(;
     modules = [SankeyMakie],
-    authors = "Julius Krumbiegel <...>, and contributors",
+    authors = "Julius Krumbiegel and contributors",
     sitename = "SankeyMakie.jl",
     format = DocumenterVitepress.MarkdownVitepress(;
         repo = "https://github.com/MakieOrg/SankeyMakie.jl",
@@ -20,7 +21,7 @@ makedocs(;
     ],
 )
 
-deploydocs(;
+DocumenterVitepress.deploydocs(;
     repo = "github.com/MakieOrg/SwarmMakie.jl",
     devbranch = "main",
     push_preview = true,
