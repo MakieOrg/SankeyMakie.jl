@@ -12,7 +12,7 @@ makedocs(;
     format = DocumenterVitepress.MarkdownVitepress(;
         repo = "https://github.com/MakieOrg/SankeyMakie.jl",
         devurl = "dev",
-        devbranch = "main",
+        devbranch = "master",
     ),
     pages=[
         "Home" => "index.md",
@@ -24,6 +24,6 @@ makedocs(;
 
 DocumenterVitepress.deploydocs(;
     repo = "github.com/MakieOrg/SankeyMakie.jl",
-    devbranch = "main",
+    devbranch = "master",
     push_preview = true,
 )
