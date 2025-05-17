@@ -12,8 +12,8 @@ hero:
     alt: SankeyMakie
   actions:
     - theme: brand
-      text: Introduction
-      link: /introduction
+      text: Reference
+      link: /reference
     - theme: alt
       text: View on Github
       link: https://github.com/MakieOrg/SankeyMakie.jl
