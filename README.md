@@ -7,7 +7,13 @@
     </picture>
 </div>
 
-A Makie port of [https://github.com/daschw/SankeyPlots.jl](https://github.com/daschw/SankeyPlots.jl)
+
+[![CI](https://github.com/MakieOrg/SankeyMakie.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/MakieOrg/SankeyMakie.jl/actions/workflows/ci.yml)
+[![codecov.io](https://codecov.io/github/MakieOrg/SankeyMakie.jl/coverage.svg?branch=master)](http://codecov.io/github/MakieOrg/SankeyMakie.jl?branch=master)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://makieorg.github.io/SankeyMakie.jl/stable)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://makieorg.github.io/SankeyMakie.jl/dev)
+
+A package to plot Sankey diagrams using Makie.jl
 
 ## Example
 
@@ -61,3 +67,7 @@ sankey(connections,
     figure = (; size = (1000, 500))
 )
 ```
+
+## Acknowledgements
+
+SankeyMakie started as a port of [SankeyPlots.jl](https://github.com/daschw/SankeyPlots.jl)
