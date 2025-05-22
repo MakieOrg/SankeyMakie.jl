@@ -28,6 +28,8 @@ jobs:
           - '1'
         os:
           - ubuntu-latest
+          - windows-latest
+          - macos-latest
         arch:
           - x64
     steps:
