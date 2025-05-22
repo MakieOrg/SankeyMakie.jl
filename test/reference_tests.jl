@@ -48,7 +48,7 @@ reftest("basic sankey") do
     return fig
 end
 
-reftest("sankey standard `forceorder`") do
+reftest("sankey standard forceorder") do
     connections, labels = test_connections_and_labels()
     fig, ax, plt = sankey(
         connections,
@@ -61,7 +61,7 @@ reftest("sankey standard `forceorder`") do
     return fig
 end
 
-reftest("sankey `forceorder = :reverse`") do
+reftest("sankey forceorder reverse") do
     connections, labels = test_connections_and_labels()
     fig, ax, plt = sankey(
         connections,
